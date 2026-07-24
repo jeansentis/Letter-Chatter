@@ -115,7 +115,7 @@ app.post("/api/dev/start", (_request, response) => {
 // Omitting the host lets Node accept both IPv6 localhost and IPv4 connections.
 const server = app.listen(config.port, () => {
   const overlay = settings.get();
-  console.log(`Stream Letters control: http://localhost:${config.port}/control`);
+  console.log(`Letter Chatter control: http://localhost:${config.port}/control`);
   console.log(`OBS browser source:     http://localhost:${config.port}/overlay (${overlay.overlayWidth} x ${overlay.overlayHeight})`);
   console.log(auth.configured ? "Twitch app credentials found." : "Twitch setup required: add the Client ID and Client Secret to .env.");
 });

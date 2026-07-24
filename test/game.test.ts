@@ -323,7 +323,7 @@ test("supports accented words and reports the selected languages", () => {
 });
 
 test("combines selected dictionaries and reports every matching language", () => {
-  const directory = fs.mkdtempSync(path.join(os.tmpdir(), "stream-letters-languages-"));
+  const directory = fs.mkdtempSync(path.join(os.tmpdir(), "letter-chatter-languages-"));
   fs.writeFileSync(path.join(directory, "nl.txt"), "# name: Nederlands\n# flag: 🇳🇱\nKAT\nÉTÉ\n", "utf8");
   fs.writeFileSync(path.join(directory, "fr.txt"), "# name: Français\n# flag: 🇫🇷\nCHAT\nÉTÉ\n", "utf8");
   try {

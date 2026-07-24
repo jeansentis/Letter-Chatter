@@ -1,4 +1,4 @@
-# Stream Letters
+# Letter Chatter
 
 A compact Twitch chat word game for an OBS browser source. Viewers make English words from the visible letter rack; the first valid guess scores and later duplicate guesses appear in gray for zero points.
 
@@ -8,10 +8,10 @@ A compact Twitch chat word game for an OBS browser source. Viewers make English 
 2. Copy `.env.example` to `.env` (keep the example file free of real credentials).
 3. Register a Twitch application and set its OAuth redirect URL to exactly `http://localhost:1010/auth/twitch/callback`.
 4. Put the application's Client ID and Client Secret in `.env`.
-5. Double-click **Start Stream Letters.cmd** (or run `npm run dev`), then choose **Connect Twitch** in the dashboard that opens.
+5. Double-click **Start Letter Chatter.cmd** (or run `npm run dev`), then choose **Connect Twitch** in the dashboard that opens.
 6. Add `http://localhost:1010/overlay` to OBS as a browser source. Match its width and height to the values shown in the dashboard.
 
-Double-click **Stop Stream Letters.cmd** to stop a server launched by the start shortcut.
+Double-click **Stop Letter Chatter.cmd** to stop a server launched by the start shortcut.
 
 For a Raspberry Pi, use a current 64-bit Raspberry Pi OS and Node.js 20+. After `npm run build`, `npm start` runs the compiled server. Keep `.env` and `data/twitch-auth.json` private: both contain secrets.
 

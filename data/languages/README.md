@@ -17,7 +17,7 @@ AARD
 - Put one word per line after the metadata. Case does not matter.
 - Words must contain only letters and be 3–15 letters long. Accented Unicode letters are supported.
 - Blank lines and other lines beginning with `#` are ignored.
-- Restart Stream Letters after adding or replacing a file. It will then appear in the Language setting.
+- Restart Letter Chatter after adding or replacing a file. It will then appear in the Language setting.
 
 English remains built in and does not need a file.
 
