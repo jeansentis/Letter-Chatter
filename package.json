@@ -1,0 +1,30 @@
+{
+  "name": "stream-letters",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "A compact Twitch chat word game for an OBS browser source.",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "dev": "tsx watch src/server.ts",
+    "build": "tsc",
+    "start": "node dist/src/server.js",
+    "test": "node --import tsx --test test/*.test.ts",
+    "import-languages": "node scripts/import-language-packs.mjs"
+  },
+  "dependencies": {
+    "dotenv": "^16.6.1",
+    "express": "^5.1.0",
+    "word-list": "^4.1.0",
+    "ws": "^8.18.3"
+  },
+  "devDependencies": {
+    "@types/express": "^5.0.3",
+    "@types/node": "^24.0.15",
+    "@types/ws": "^8.18.1",
+    "tsx": "^4.20.3",
+    "typescript": "^5.8.3"
+  }
+}

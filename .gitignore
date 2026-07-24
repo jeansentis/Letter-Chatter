@@ -1,0 +1,10 @@
+node_modules/
+dist/
+.env
+data/scores.json
+data/twitch-auth.json
+data/settings.json
+data/server.pid
+data/*.log
+*.log
+*.bak

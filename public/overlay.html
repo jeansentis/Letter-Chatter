@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Stream Letters Overlay</title>
+  <link rel="stylesheet" href="/overlay.css">
+</head>
+<body>
+  <main id="overlay" aria-live="polite">
+    <section id="play-view">
+      <div class="timer">
+        <span id="seconds">--</span>
+        <small id="mode-label">RACE</small>
+        <small id="level-record" class="level-record hidden">RECORD 1</small>
+        <div id="target" class="target">
+          <div id="level-points" class="level-points hidden"><b id="target-score">0</b><small>PTS LEFT</small></div>
+          <div class="available-words"><b id="words-left">0</b><small>WORDS LEFT</small></div>
+        </div>
+      </div>
+      <div class="game-area">
+        <div id="letters" class="letters"></div>
+        <div class="time-bar"><b id="time-fill"></b></div>
+        <div class="guess-row">
+          <div id="guess" class="guess idle"><b>Waiting for a word…</b><span></span></div>
+          <div id="guess-language" class="guess-language hidden" role="img" aria-label=""></div>
+        </div>
+        <div id="score-pop" class="score-pop"></div>
+        <div id="rack-cooldown" class="rack-cooldown hidden"><b id="rack-cooldown-seconds">5</b><small>🔒 LOCK</small></div>
+      </div>
+    </section>
+    <section id="countdown-view" class="hidden">
+      <div class="countdown-number"><span id="countdown-seconds">5</span><small>GET READY</small></div>
+      <div class="countdown-copy"><strong>LETTERS ON STREAM</strong><span id="countdown-message">Guess words with the letters!</span><b id="countdown-goal"></b></div>
+    </section>
+    <section id="results-view" class="hidden">
+      <div id="round-ended" class="round-ended">ROUND<br><b>OVER</b><small id="next-round"></small></div>
+      <div id="boards" class="boards"></div>
+    </section>
+    <section id="setup-view" class="hidden">
+      <strong>STREAM LETTERS</strong>
+      <span>Connect Twitch in the control panel</span>
+    </section>
+    <div id="effects" class="effects" aria-hidden="true"></div>
+  </main>
+  <script type="module" src="/overlay.js"></script>
+</body>
+</html>

@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Stream Letters Control</title>
+  <link rel="stylesheet" href="/control.css">
+</head>
+<body>
+  <main>
+    <header><div><span>STREAM LETTERS</span><h1>Game control</h1></div><i id="live-dot">offline</i></header>
+    <section class="card twitch-card">
+      <div><small>REQUIRED CONNECTION</small><h2>Twitch chat</h2><p id="twitch-detail">Checking setup…</p></div>
+      <div id="twitch-action"></div>
+    </section>
+    <section class="card settings-card">
+      <div class="section-head"><div><small>GAME &amp; OVERLAY</small><h2>Settings</h2></div><button form="settings-form">Save settings</button></div>
+      <form id="settings-form" class="settings-form">
+        <fieldset><legend>Game</legend>
+          <label>Mode<select id="mode"><option value="race">Race - individual high score</option><option value="level">Level - shared target</option><option value="time">Time Attack - words add time</option></select></label>
+          <div class="language-setting"><span>Languages</span><div id="languages" class="language-options"><label><input type="checkbox" value="english" checked> 🇬🇧 English</label></div></div>
+          <label>Round seconds<input id="roundSeconds" type="number" min="10" max="3600"></label>
+          <label>Pre-round countdown<input id="countdownSeconds" type="number" min="3" max="30"></label>
+          <label>Shuffle every seconds<input id="shuffleSeconds" type="number" min="5" max="60"></label>
+          <label>Viewer cooldown seconds<input id="guessCooldownSeconds" type="number" min="1" max="30"></label>
+          <label class="time-setting">Seconds added per word<input id="timeBonusSeconds" type="number" min="1" max="30"></label>
+          <label>Minimum letters<input id="minLetters" type="number" min="5" max="15"></label>
+          <label>Maximum letters<input id="maxLetters" type="number" min="5" max="15"></label>
+          <label>Minimum possible words<input id="minimumWords" type="number" min="1" max="500"></label>
+          <label class="level-setting check"><input id="dynamicDifficulty" type="checkbox"> Dynamic difficulty by player count</label>
+          <label class="level-setting dynamic-setting">Base points (1 player)<input id="dynamicPointsPerPlayer" type="number" min="5" max="1000" step="5"></label>
+          <label class="level-setting fixed-level-setting">Fixed Level 1 target<input id="levelBaseGoal" type="number" min="50" max="10000" step="50"></label>
+          <label class="level-setting">Difficulty growth<input id="levelGrowth" type="number" min="1.05" max="3" step="0.05"></label>
+          <label class="check"><input id="autoContinue" type="checkbox"> Auto-continue after results</label>
+          <label class="check"><input id="replaceUsedLetters" type="checkbox"> Replace used letters after each word</label>
+          <label>Results seconds<input id="intermissionSeconds" type="number" min="3" max="300"></label>
+        </fieldset>
+        <fieldset><legend>Browser source</legend>
+          <label>Width<input id="overlayWidth" type="number" min="320" max="1920"></label>
+          <label>Height<input id="overlayHeight" type="number" min="80" max="1080"></label>
+          <label>Typeface<select id="fontFamily"><option value="system">Clean system</option><option value="rounded">Rounded</option><option value="mono">Monospace</option><option value="serif">Serif</option></select></label>
+          <label>Timer size<input id="timerFontSize" type="number" min="12" max="80"></label>
+          <label>Letter size<input id="letterFontSize" type="number" min="12" max="80"></label>
+          <label>Word size<input id="wordFontSize" type="number" min="10" max="80"></label>
+          <label>Username size<input id="userFontSize" type="number" min="7" max="32"></label>
+        </fieldset>
+        <fieldset><legend>Cartoon colors</legend>
+          <label>Theme<select id="theme"><option value="candy">Candy pop</option><option value="sunny">Sunny arcade</option><option value="ocean">Ocean splash</option><option value="lime">Lime punch</option><option value="midnight">Midnight neon</option></select></label>
+          <label>Primary<input id="primaryColor" type="color"></label>
+          <label>Secondary<input id="secondaryColor" type="color"></label>
+          <label>Background<input id="backgroundColor" type="color"></label>
+          <label>Letter tiles<input id="tileColor" type="color"></label>
+          <label>Text<input id="textColor" type="color"></label>
+        </fieldset>
+      </form>
+      <p id="settings-result" class="form-result"></p>
+    </section>
+    <section class="card preview-card">
+      <div class="section-head"><div><small id="preview-size">OBS PREVIEW</small><h2>Browser source</h2></div><button id="copy-url" class="subtle">Copy URL</button></div>
+      <div class="preview"><iframe src="/overlay" width="500" height="100" title="Overlay preview"></iframe></div>
+    </section>
+    <div class="columns">
+      <section class="card"><small>ROUND CONTROL</small><h2>Current game</h2><div class="actions"><button id="new-round">New letters</button><button id="end-round" class="subtle">End round</button></div></section>
+      <section class="card dev"><small>DEVELOPER TEST</small><h2>Simulate chat</h2><form id="guess-form"><input id="username" value="local-player" aria-label="Username"><input id="word" placeholder="word" required aria-label="Word"><button>Send</button></form><p id="guess-result"></p><button id="offline-start" class="text-button">Start an offline test round</button></section>
+    </div>
+  </main>
+  <script type="module" src="/control.js"></script>
+</body>
+</html>
