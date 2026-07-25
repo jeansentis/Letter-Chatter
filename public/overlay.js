@@ -11,6 +11,7 @@ const flagAssets = {
   "🇩🇪": "/flags/de.svg",
   "🇪🇸": "/flags/es.svg",
   "🇫🇷": "/flags/fr.svg",
+  "🇵🇹": "/flags/pt.svg",
 };
 const play = document.querySelector("#play-view");
 const results = document.querySelector("#results-view");
@@ -258,11 +259,16 @@ function renderResults() {
 }
 
 function renderResultBoard() {
-  const boards = [["round", "This round"], ["stream", "This stream"], ["overall", "All time"]];
+  const boards = [["round", "This round"], ["stream", "This stream"], ["overall", "All time"], ["brand", "Letter Chatters"]];
   const index = Math.floor((Date.now() - state.phaseStartedAt) / 3000) % boards.length;
   if (index === lastResultBoard) return;
   lastResultBoard = index;
   const [key, label] = boards[index];
+  if (key === "brand") {
+    const website = escapeHtml(location.host);
+    document.querySelector("#boards").innerHTML = `<div class="board brand-board"><h2>${label}</h2><p>Play along on Twitch</p><strong>${website}</strong></div>`;
+    return;
+  }
   const rows = state.leaderboards[key];
   const content = rows.length ? rows.map((row, rank) => `<li><i>${rank + 1}</i><b>${escapeHtml(row.username)}</b><span>${row.score}</span></li>`).join("") : '<li class="empty"><b>No scores yet</b></li>';
   document.querySelector("#boards").innerHTML = `<div class="board"><h2>${label}</h2><ol>${content}</ol></div>`;
@@ -308,7 +314,8 @@ function escapeAttribute(value) {
 
 function connect() {
   const protocol = location.protocol === "https:" ? "wss" : "ws";
-  const socket = new WebSocket(`${protocol}://${location.host}/live`);
+  const overlayKey = location.pathname.split("/").filter(Boolean).at(-1) ?? "";
+  const socket = new WebSocket(`${protocol}://${location.host}/live?overlay=${encodeURIComponent(overlayKey)}`);
   socket.onmessage = (message) => render(JSON.parse(message.data));
   socket.onclose = () => setTimeout(connect, 1500);
 }

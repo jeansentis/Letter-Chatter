@@ -3,6 +3,8 @@
 body { margin: 0; min-height: 100vh; background: radial-gradient(circle at 75% 0,#292437 0,transparent 38%),#0d0f16; }
 main { width: min(860px,calc(100% - 32px)); margin: 0 auto; padding: 42px 0 70px; }
 header { display: flex; align-items: end; justify-content: space-between; margin-bottom: 28px; }
+.header-actions { display: flex; align-items: center; gap: 9px; }
+.header-actions a { color: #aeb4c2; font-size: 11px; text-decoration: none; }
 header span, small { color: #d6af55; font-size: 10px; letter-spacing: 1.8px; font-weight: 650; }
 h1 { margin: 5px 0 0; font-size: 34px; letter-spacing: -.8px; }
 h2 { margin: 6px 0 0; font-size: 19px; }
@@ -21,6 +23,7 @@ iframe { display: block; margin: auto; border: 0; }
 .columns { display: grid; grid-template-columns: .85fr 1.15fr; gap: 16px; }
 .columns .card { margin-top: 16px; }
 .actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 23px; }
+.actions.compact { margin-top: 0; }
 form { display: grid; grid-template-columns: 1fr 1fr auto; gap: 7px; margin-top: 17px; }
 input, select { width: 100%; min-width: 0; border: 1px solid #343848; border-radius: 8px; padding: 10px; background: #11131b; color: #fff; font: 12px Inter,sans-serif; }
 .settings-form { display: grid; grid-template-columns: repeat(3,1fr); gap: 24px; margin-top: 22px; }
@@ -32,10 +35,14 @@ input, select { width: 100%; min-width: 0; border: 1px solid #343848; border-rad
 .settings-form .check input { display: inline-block; width: auto; margin: 0; }
 .settings-form .language-setting { grid-column: 1 / -1; color: #8f96a9; font-size: 10px; }
 .language-options { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin-top: 5px; padding: 8px; border: 1px solid #343848; border-radius: 8px; background: #11131b; }
-.language-options label { display: flex; align-items: center; gap: 6px; padding: 3px; color: #d9dce5; cursor: pointer; }
+.language-options .language-option { display: flex; align-items: center; gap: 4px; }
+.language-options label { display: flex; flex: 1; align-items: center; gap: 6px; padding: 3px; color: #d9dce5; cursor: pointer; }
 .language-options input { width: auto; margin: 0; }
+.language-options .remove-language { padding: 3px 7px; color: #ff9cac; background: transparent; font-size: 14px; }
+.language-upload { display: grid; grid-template-columns: 1fr 70px 1.3fr auto; gap: 6px; margin-top: 8px; }
+.language-upload input { font-size: 10px; }
 .settings-form input[type="color"] { height: 38px; padding: 3px; cursor: pointer; }
 .form-result { min-height: 18px; margin: 12px 0 -4px; color: #7ee4ab; }
 #guess-result { min-height: 20px; margin: 8px 0 0; }
 .text-button { padding: 0; background: transparent; color: #767e93; font-weight: 450; font-size: 10px; text-decoration: underline; }
-@media (max-width: 680px) { .columns, .settings-form { grid-template-columns: 1fr; } .twitch-card { align-items: start; } }
+@media (max-width: 680px) { .columns, .settings-form, .language-upload { grid-template-columns: 1fr; } .twitch-card { align-items: start; } }

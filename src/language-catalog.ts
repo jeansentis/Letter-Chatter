@@ -15,10 +15,14 @@ export interface LanguageSelection {
 
 export class LanguageCatalog {
   private readonly englishInfo: LanguageInfo = { id: "english", name: "English", flag: "🇬🇧" };
-  private english?: LanguagePack;
-  private readonly cache = new Map<string, { modified: number; pack: LanguagePack }>();
+  private static english?: LanguagePack;
+  private static readonly cache = new Map<string, { modified: number; pack: LanguagePack }>();
 
-  constructor(private readonly directory: string) {}
+  private readonly directories: string[];
+
+  constructor(directory: string | readonly string[]) {
+    this.directories = Array.isArray(directory) ? [...directory] : [directory];
+  }
 
   list(): LanguageInfo[] {
     return [this.englishInfo, ...this.files().map((file) => this.readInfo(file))]
@@ -31,9 +35,8 @@ export class LanguageCatalog {
 
   get(id: string): LanguagePack {
     if (id === "english") {
-      const english = this.english ?? { info: this.englishInfo, dictionary: new Dictionary() };
-      this.english = english;
-      this.cache.clear();
+      const english = LanguageCatalog.english ?? { info: this.englishInfo, dictionary: new Dictionary() };
+      LanguageCatalog.english = english;
       return english;
     }
     const file = this.files().find((candidate) => this.idFor(candidate) === id);
@@ -50,14 +53,19 @@ export class LanguageCatalog {
   }
 
   private files(): string[] {
-    try {
-      return fs.readdirSync(this.directory, { withFileTypes: true })
-        .filter((entry) => entry.isFile() && entry.name.toLowerCase().endsWith(".txt"))
-        .map((entry) => path.join(this.directory, entry.name));
-    } catch (error) {
-      if ((error as NodeJS.ErrnoException).code !== "ENOENT") console.error("Could not scan language packs:", error);
-      return [];
+    const byId = new Map<string, string>();
+    for (const directory of this.directories) {
+      try {
+        for (const entry of fs.readdirSync(directory, { withFileTypes: true })) {
+          if (!entry.isFile() || !entry.name.toLowerCase().endsWith(".txt")) continue;
+          const file = path.join(directory, entry.name);
+          byId.set(this.idFor(file), file);
+        }
+      } catch (error) {
+        if ((error as NodeJS.ErrnoException).code !== "ENOENT") console.error("Could not scan language packs:", error);
+      }
     }
+    return [...byId.values()];
   }
 
   private idFor(file: string): string {
@@ -67,7 +75,7 @@ export class LanguageCatalog {
   private load(file: string): LanguagePack {
     const modified = fs.statSync(file).mtimeMs;
     const id = this.idFor(file);
-    const cached = this.cache.get(id);
+    const cached = LanguageCatalog.cache.get(file);
     if (cached?.modified === modified) return cached.pack;
 
     const lines = fs.readFileSync(file, "utf8").replace(/^\uFEFF/, "").split(/\r?\n/);
@@ -79,8 +87,7 @@ export class LanguageCatalog {
     const dictionary = new Dictionary(words);
     if (dictionary.words.size === 0) throw new Error(`Language pack ${path.basename(file)} contains no valid words.`);
     const pack = { info, dictionary };
-    this.cache.clear();
-    this.cache.set(id, { modified, pack });
+    LanguageCatalog.cache.set(file, { modified, pack });
     return pack;
   }
 

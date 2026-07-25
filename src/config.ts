@@ -8,6 +8,7 @@ const integer = (name: string, fallback: number) => {
 
 export const config = {
   port: integer("PORT", 1010),
+  sessionSecret: process.env.SESSION_SECRET ?? "",
   game: {
     mode: "race",
     languages: ["english"],

@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="description" content="Turn your Twitch chat into a fast, colorful word game with Letter Chatters.">
+  <title>Letter Chatters — A word game for Twitch chat</title>
+  <link rel="stylesheet" href="/home.css">
+</head>
+<body>
+  <nav>
+    <a class="wordmark" href="/" aria-label="Letter Chatters home"><span>LC</span> Letter Chatters</a>
+    <a class="nav-link" href="/control">Streamer dashboard</a>
+  </nav>
+  <main>
+    <section class="hero">
+      <div class="hero-copy">
+        <p class="eyebrow">A LIVE WORD GAME FOR TWITCH</p>
+        <h1>Give your chat<br><em>something to say.</em></h1>
+        <p class="intro">Drop Letter Chatters into OBS, connect your channel, and let viewers race to build words from a shared rack of letters.</p>
+        <div class="actions" id="primary-actions">
+          <a class="button primary" href="/auth/twitch">Connect with Twitch</a>
+          <a class="button secondary" href="/control">Open dashboard</a>
+        </div>
+        <p class="connection" id="connection">Checking Twitch connection…</p>
+      </div>
+      <div class="game-card" aria-label="Letter Chatters game preview">
+        <div class="preview-top"><span>42</span><small>RACE</small></div>
+        <div class="tiles" aria-hidden="true">
+          <i>L</i><i>E</i><i>T</i><i>T</i><i>E</i><i>R</i><i>S</i>
+        </div>
+        <div class="guess"><b>CHATTER</b><span>wordwizard · +18</span></div>
+        <div class="ticker"><span></span></div>
+      </div>
+    </section>
+    <section class="steps" aria-labelledby="steps-title">
+      <div>
+        <p class="eyebrow">STREAMER SETUP</p>
+        <h2 id="steps-title">Live in three moves.</h2>
+      </div>
+      <ol>
+        <li><span>01</span><div><b>Connect Twitch</b><p>Authorize your broadcaster account so the game can listen to chat.</p></div></li>
+        <li><span>02</span><div><b>Choose your game</b><p>Pick languages, mode, timing, difficulty, colors, and typography.</p></div></li>
+        <li><span>03</span><div><b>Paste into OBS</b><p>Copy your browser-source link from the dashboard and start playing.</p></div></li>
+      </ol>
+    </section>
+    <section class="features">
+      <article><span>🌍</span><h3>Play in your language</h3><p>Mix English, Dutch, German, Frisian, Spanish, French, and Portuguese dictionaries.</p></article>
+      <article><span>🏁</span><h3>Three ways to play</h3><p>Race for the high score, beat shared levels, or keep Time Attack alive together.</p></article>
+      <article><span>🎨</span><h3>Made for your stream</h3><p>Customize the compact overlay to fit your layout and channel colors.</p></article>
+    </section>
+  </main>
+  <footer><span>LETTER CHATTERS</span><p>Built for busy chats and clever words.</p></footer>
+  <script type="module" src="/home.js"></script>
+</body>
+</html>

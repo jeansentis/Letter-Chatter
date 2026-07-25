@@ -4,6 +4,8 @@ dist/
 data/scores.json
 data/twitch-auth.json
 data/settings.json
+data/streamers/
+data/pending-auth/
 data/server.pid
 data/*.log
 *.log

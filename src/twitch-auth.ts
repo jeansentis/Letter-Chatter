@@ -44,7 +44,11 @@ export class TwitchAuth {
     return this.data?.login ?? null;
   }
 
-  authorizationUrl(): string {
+  get userId(): string | null {
+    return this.data?.userId ?? null;
+  }
+
+  beginAuthorization(): { url: string; state: string } {
     if (!this.configured) throw new Error("Add TWITCH_CLIENT_ID and TWITCH_CLIENT_SECRET to .env first.");
     this.expectedState = crypto.randomBytes(24).toString("hex");
     const query = new URLSearchParams({
@@ -55,7 +59,11 @@ export class TwitchAuth {
       state: this.expectedState,
       force_verify: "true",
     });
-    return `https://id.twitch.tv/oauth2/authorize?${query}`;
+    return { url: `https://id.twitch.tv/oauth2/authorize?${query}`, state: this.expectedState };
+  }
+
+  authorizationUrl(): string {
+    return this.beginAuthorization().url;
   }
 
   async exchangeCode(code: string, state: string): Promise<TwitchCredentials> {

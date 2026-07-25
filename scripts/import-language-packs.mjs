@@ -12,6 +12,7 @@ const languages = [
   { id: "fy", name: "Frysk", flag: "🇳🇱" },
   { id: "es", name: "Español", flag: "🇪🇸" },
   { id: "fr", name: "Français", flag: "🇫🇷" },
+  { id: "pt", name: "Português", flag: "🇵🇹" },
 ];
 
 await fs.mkdir(licenseDirectory, { recursive: true });

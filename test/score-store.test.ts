@@ -6,7 +6,7 @@ import test from "node:test";
 import { ScoreStore } from "../src/score-store.js";
 
 test("the highest Level record persists and never decreases", () => {
-  const directory = fs.mkdtempSync(path.join(os.tmpdir(), "letter-chatter-scores-"));
+  const directory = fs.mkdtempSync(path.join(os.tmpdir(), "letter-chatters-scores-"));
   const file = path.join(directory, "scores.json");
   try {
     const store = new ScoreStore(file);

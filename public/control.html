@@ -3,12 +3,12 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>Letter Chatter Control</title>
+  <title>Letter Chatters Control</title>
   <link rel="stylesheet" href="/control.css">
 </head>
 <body>
   <main>
-    <header><div><span>LETTER CHATTER</span><h1>Game control</h1></div><i id="live-dot">offline</i></header>
+    <header><div><span>LETTER CHATTERS</span><h1>Game control</h1></div><div class="header-actions"><a href="/">Home</a><button id="logout" class="text-button">Sign out</button><i id="live-dot">offline</i></div></header>
     <section class="card twitch-card">
       <div><small>REQUIRED CONNECTION</small><h2>Twitch chat</h2><p id="twitch-detail">Checking setup…</p></div>
       <div id="twitch-action"></div>
@@ -18,7 +18,17 @@
       <form id="settings-form" class="settings-form">
         <fieldset><legend>Game</legend>
           <label>Mode<select id="mode"><option value="race">Race - individual high score</option><option value="level">Level - shared target</option><option value="time">Time Attack - words add time</option></select></label>
-          <div class="language-setting"><span>Languages</span><div id="languages" class="language-options"><label><input type="checkbox" value="english" checked> 🇬🇧 English</label></div></div>
+          <div class="language-setting">
+            <span>Languages</span>
+            <div id="languages" class="language-options"><label><input type="checkbox" value="english" checked> 🇬🇧 English</label></div>
+            <div class="language-upload">
+              <input id="language-name" maxlength="40" placeholder="Custom language name" aria-label="Custom language name">
+              <input id="language-flag" maxlength="8" placeholder="🌐" value="🌐" aria-label="Language flag">
+              <input id="language-file" type="file" accept=".txt,text/plain" aria-label="Word list file">
+              <button id="upload-language" type="button" class="subtle">Upload word list</button>
+            </div>
+            <p id="language-result" class="form-result"></p>
+          </div>
           <label>Round seconds<input id="roundSeconds" type="number" min="10" max="3600"></label>
           <label>Pre-round countdown<input id="countdownSeconds" type="number" min="3" max="30"></label>
           <label>Shuffle every seconds<input id="shuffleSeconds" type="number" min="5" max="60"></label>
@@ -56,8 +66,8 @@
       <p id="settings-result" class="form-result"></p>
     </section>
     <section class="card preview-card">
-      <div class="section-head"><div><small id="preview-size">OBS PREVIEW</small><h2>Browser source</h2></div><button id="copy-url" class="subtle">Copy URL</button></div>
-      <div class="preview"><iframe src="/overlay" width="500" height="100" title="Overlay preview"></iframe></div>
+      <div class="section-head"><div><small id="preview-size">OBS PREVIEW</small><h2>Private browser source</h2></div><div class="actions compact"><button id="regenerate-url" class="text-button">Rotate link</button><button id="copy-url" class="subtle">Copy URL</button></div></div>
+      <div class="preview"><iframe src="about:blank" width="500" height="100" title="Overlay preview"></iframe></div>
     </section>
     <div class="columns">
       <section class="card"><small>ROUND CONTROL</small><h2>Current game</h2><div class="actions"><button id="new-round">New letters</button><button id="end-round" class="subtle">End round</button></div></section>

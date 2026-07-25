@@ -1,6 +1,7 @@
 const detail = document.querySelector("#twitch-detail");
 const action = document.querySelector("#twitch-action");
 const dot = document.querySelector("#live-dot");
+let overlayPath = null;
 const numericSettings = [
   "roundSeconds", "countdownSeconds", "shuffleSeconds", "guessCooldownSeconds", "timeBonusSeconds", "minLetters", "maxLetters", "minimumWords", "levelBaseGoal", "levelGrowth", "dynamicPointsPerPlayer",
   "intermissionSeconds", "overlayWidth", "overlayHeight", "timerFontSize",
@@ -17,6 +18,8 @@ const palettes = {
 
 async function status() {
   const data = await fetch("/api/twitch/status").then((response) => response.json());
+  overlayPath = data.overlayPath;
+  if (overlayPath) document.querySelector(".preview iframe").src = overlayPath;
   dot.textContent = data.connected ? "chat connected" : "chat offline";
   dot.className = data.connected ? "connected" : "";
   if (!data.configured) {
@@ -50,7 +53,17 @@ async function loadSettings() {
 async function loadLanguages() {
   const languages = await request("/api/languages").then((response) => response.json());
   const container = document.querySelector("#languages");
-  container.innerHTML = languages.map((language) => `<label><input type="checkbox" value="${escapeAttribute(language.id)}"> ${escapeHtml(language.flag)} ${escapeHtml(language.name)}</label>`).join("");
+  container.innerHTML = languages.map((language) => `<div class="language-option"><label><input type="checkbox" value="${escapeAttribute(language.id)}"> ${escapeHtml(language.flag)} ${escapeHtml(language.name)}</label>${language.custom ? `<button type="button" class="remove-language" data-language="${escapeAttribute(language.id)}" title="Remove ${escapeAttribute(language.name)}">×</button>` : ""}</div>`).join("");
+  for (const button of container.querySelectorAll(".remove-language")) {
+    button.onclick = async () => {
+      if (!confirm("Remove this custom language?")) return;
+      const response = await request(`/api/languages/${encodeURIComponent(button.dataset.language)}`, "DELETE");
+      const result = await response.json();
+      document.querySelector("#language-result").textContent = response.ok ? "Language removed." : result.error;
+      await loadLanguages();
+      await loadSettings();
+    };
+  }
 }
 
 function renderSettings(settings) {
@@ -67,6 +80,7 @@ function renderSettings(settings) {
   document.querySelector("#intermissionSeconds").disabled = !settings.autoContinue;
   updateConditionalSettings(settings.mode, settings.dynamicDifficulty);
   const frame = document.querySelector(".preview iframe");
+  if (overlayPath) frame.src = overlayPath;
   frame.width = settings.overlayWidth;
   frame.height = settings.overlayHeight;
   document.querySelector("#preview-size").textContent = `OBS PREVIEW - ${settings.overlayWidth} x ${settings.overlayHeight}`;
@@ -104,9 +118,42 @@ document.querySelector("#theme").onchange = (event) => {
   if (palette) for (const [key, value] of Object.entries(palette)) document.querySelector(`#${key}`).value = value;
 };
 document.querySelector("#copy-url").onclick = async (event) => {
-  await navigator.clipboard.writeText(`${location.origin}/overlay`);
+  if (!overlayPath) return;
+  await navigator.clipboard.writeText(`${location.origin}${overlayPath}`);
   event.target.textContent = "Copied";
   setTimeout(() => event.target.textContent = "Copy URL", 1200);
+};
+document.querySelector("#regenerate-url").onclick = async () => {
+  if (!confirm("Rotate the private link? The current OBS browser source will stop receiving updates.")) return;
+  const response = await request("/api/overlay/regenerate", "POST");
+  const result = await response.json();
+  if (!response.ok) return;
+  overlayPath = result.overlayPath;
+  document.querySelector(".preview iframe").src = overlayPath;
+  document.querySelector("#settings-result").textContent = "Private link rotated. Copy the new URL into OBS.";
+};
+document.querySelector("#logout").onclick = async () => {
+  await request("/api/logout", "POST");
+  location.href = "/";
+};
+document.querySelector("#upload-language").onclick = async () => {
+  const file = document.querySelector("#language-file").files[0];
+  const message = document.querySelector("#language-result");
+  if (!file) { message.textContent = "Choose a UTF-8 text file first."; return; }
+  if (file.size > 5 * 1024 * 1024) { message.textContent = "Language files are limited to 5 MB."; return; }
+  message.textContent = "Uploading and validating…";
+  const response = await request("/api/languages", "POST", {
+    name: document.querySelector("#language-name").value || file.name.replace(/\.txt$/i, ""),
+    flag: document.querySelector("#language-flag").value,
+    contents: await file.text(),
+  });
+  const result = await response.json();
+  message.textContent = response.ok ? `${result.flag} ${result.name} is ready to select.` : result.error;
+  if (response.ok) {
+    await loadLanguages();
+    await loadSettings();
+    document.querySelector("#language-file").value = "";
+  }
 };
 document.querySelector("#new-round").onclick = () => request("/api/round/new", "POST");
 document.querySelector("#end-round").onclick = () => request("/api/round/end", "POST");

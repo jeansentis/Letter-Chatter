@@ -9,7 +9,7 @@ export class TwitchChat {
 
   private options?: TwitchCredentials;
 
-  constructor(private readonly game: Game) {}
+  constructor(private readonly game: Game, private readonly label = "streamer") {}
 
   connect(
     options: TwitchCredentials,
@@ -22,7 +22,7 @@ export class TwitchChat {
     this.socket = socket;
     socket.on("message", (raw) => {
       void this.handle(JSON.parse(raw.toString()), reusingSession).catch((error) => {
-        console.error("Twitch EventSub message failed:", (error as Error).message);
+        console.error(`[${this.label}] Twitch EventSub message failed:`, (error as Error).message);
         socket.close();
       });
     });
@@ -32,7 +32,7 @@ export class TwitchChat {
       this.game.enterSetup();
       if (!this.intentionalClose && this.options) setTimeout(() => this.connect(this.options!), 5000);
     });
-    socket.on("error", (error) => console.error("Twitch EventSub error:", error.message));
+    socket.on("error", (error) => console.error(`[${this.label}] Twitch EventSub error:`, error.message));
   }
 
   close(): void {

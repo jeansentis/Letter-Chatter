@@ -1,4 +1,4 @@
-# Letter Chatter
+# Letter Chatters
 
 A compact Twitch chat word game for an OBS browser source. Viewers make English words from the visible letter rack; the first valid guess scores and later duplicate guesses appear in gray for zero points.
 
@@ -6,14 +6,31 @@ A compact Twitch chat word game for an OBS browser source. Viewers make English 
 
 1. Install Node.js 20 or newer and run `npm install`.
 2. Copy `.env.example` to `.env` (keep the example file free of real credentials).
-3. Register a Twitch application and set its OAuth redirect URL to exactly `http://localhost:1010/auth/twitch/callback`.
+3. Register a Twitch application and set its OAuth redirect URL to exactly `http://localhost:1010/auth/twitch/callback` for local development.
 4. Put the application's Client ID and Client Secret in `.env`.
-5. Double-click **Start Letter Chatter.cmd** (or run `npm run dev`), then choose **Connect Twitch** in the dashboard that opens.
-6. Add `http://localhost:1010/overlay` to OBS as a browser source. Match its width and height to the values shown in the dashboard.
+5. Double-click **Start Letter Chatters.cmd** (or run `npm run dev`), then choose **Connect Twitch** in the dashboard that opens.
+6. Copy the private overlay URL from the dashboard into an OBS browser source. Match its width and height to the values shown in the dashboard.
 
-Double-click **Stop Letter Chatter.cmd** to stop a server launched by the start shortcut.
+Double-click **Stop Letter Chatters.cmd** to stop a server launched by the start shortcut.
 
-For a Raspberry Pi, use a current 64-bit Raspberry Pi OS and Node.js 20+. After `npm run build`, `npm start` runs the compiled server. Keep `.env` and `data/twitch-auth.json` private: both contain secrets.
+## Raspberry Pi and PM2
+
+Use a current 64-bit Raspberry Pi OS with Node.js 20+:
+
+```sh
+npm ci
+npm run build
+sudo npm install -g pm2
+npm run pm2:start
+pm2 startup
+pm2 save
+```
+
+Run `npm run pm2:logs` to follow Letter Chatters, `pm2 logs` to follow every PM2 service on the Pi together, `pm2 status` to inspect them, and `npm run pm2:reload` after pulling and testing an update. The PM2 configuration deliberately uses one process: live game state and OBS WebSockets are held in memory, while that process can host any number of isolated streamer runtimes.
+
+Put the site behind HTTPS with a tunnel or reverse proxy. Set `TWITCH_REDIRECT_URI` to the exact public callback, such as `https://play.example.com/auth/twitch/callback`, register that same URL in the Twitch developer console, and set a long random `SESSION_SECRET`. Keep `.env` and all of `data/streamers` private because they contain Twitch refresh tokens and streamer data.
+
+Each Twitch broadcaster gets an isolated directory under `data/streamers/<twitch-user-id>` with their settings, scores, authentication, custom languages, and persistent private overlay key. Existing single-streamer data is copied into this layout automatically on the first multi-streamer start.
 
 ## Rules
 
@@ -41,6 +58,6 @@ For a Raspberry Pi, use a current 64-bit Raspberry Pi OS and Node.js 20+. After 
 
 The dashboard controls mode, one or more simultaneous languages, viewer cooldown, round and results timing, auto-continue, rack size, fixed or player-scaled level difficulty, browser-source dimensions, typeface, font sizes, bright theme presets, and custom overlay colors. When a valid word belongs to multiple selected dictionaries, every matching flag is shown. These choices persist in `data/settings.json`.
 
-Extra language dictionaries live in `data/languages`. See `data/languages/README.md` for the UTF-8 word-list format. English stays available as the built-in default.
+Built-in language dictionaries live in `data/languages`. Streamers can upload their own UTF-8 `.txt` word lists from the dashboard; these remain private to that streamer. See `data/languages/README.md` for the format. English stays available as the built-in default.
 
 The port, initial timing defaults, rack defaults, and OAuth callback remain configurable in `.env`.
