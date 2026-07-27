@@ -36,6 +36,10 @@ test("isolates settings, overlays, scores, and uploaded languages by streamer", 
     assert.equal(alpha.settings.get().roundSeconds, 123);
     assert.notEqual(bravo.settings.get().roundSeconds, 123);
     assert.equal(bravo.settings.get().mode, "level");
+    assert.equal(bravo.settings.get().overlayWidth, 600);
+    assert.equal(bravo.settings.get().overlayHeight, 150);
+    assert.equal(bravo.settings.get().letterFontSize, 27);
+    assert.equal(bravo.settings.get().wordFontSize, 27);
     assert.equal(alpha.languageList().some((language) => language.id === "custom-testish"), true);
     assert.equal(bravo.languageList().some((language) => language.id === "custom-testish"), false);
     manager.stopAll();

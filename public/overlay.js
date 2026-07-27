@@ -265,8 +265,7 @@ function renderResultBoard() {
   lastResultBoard = index;
   const [key, label] = boards[index];
   if (key === "brand") {
-    const website = escapeHtml(location.host);
-    document.querySelector("#boards").innerHTML = `<div class="board brand-board"><h2>${label}</h2><p>Play along on Twitch</p><strong>${website}</strong></div>`;
+    document.querySelector("#boards").innerHTML = `<div class="board brand-board"><div class="brand-lockup"><span class="brand-tile">LC</span><div class="brand-copy"><h2>Letter <em>Chatters</em></h2><small>By TheJeansentis</small></div></div><strong>letterchatter.com</strong></div>`;
     return;
   }
   const rows = state.leaderboards[key];

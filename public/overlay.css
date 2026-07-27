@@ -1,9 +1,9 @@
 :root {
   color-scheme: dark;
-  --overlay-width: 500px; --overlay-height: 100px;
+  --overlay-width: 600px; --overlay-height: 150px;
   --font-family: system-ui, sans-serif;
-  --timer-font-size: 27px; --letter-font-size: 21px;
-  --word-font-size: 17px; --user-font-size: 8px;
+  --timer-font-size: 27px; --letter-font-size: 27px;
+  --word-font-size: 27px; --user-font-size: 8px;
   --primary: #ffcf4a; --secondary: #ff5fa2; --panel: #35245f;
   --tile: #fff3bd; --text: #ffffff;
   font-family: var(--font-family);
@@ -89,10 +89,18 @@ html, body { width: var(--overlay-width); height: var(--overlay-height); margin:
 #overlay.result-loss .result-level { color: #ffb4c8; }
 #overlay.result-loss .result-outcome { color: #ff759b; text-shadow: 0 0 10px rgba(255,70,125,.65); }
 .boards { display: grid; align-content: center; padding: 10px 18px; }
-.brand-board { text-align: center; }
-.brand-board h2 { margin-bottom: 4px; color: var(--primary); font-size: clamp(20px,calc(var(--word-font-size) * 1.35),30px); }
-.brand-board p { margin: 0 0 5px; color: color-mix(in srgb,var(--text),transparent 25%); font-size: 10px; font-weight: 800; letter-spacing: 1px; text-transform: uppercase; }
-.brand-board strong { color: var(--text); font-size: clamp(12px,var(--word-font-size),20px); }
+.brand-board { display: flex; align-items: center; justify-content: center; gap: 20px; text-align: left; }
+.brand-lockup { display: flex; align-items: center; gap: 13px; }
+.brand-tile {
+  display: grid; width: 54px; height: 54px; flex: 0 0 auto; place-items: center; transform: rotate(-4deg);
+  color: color-mix(in srgb,var(--panel),#000 20%); font-size: 17px; font-weight: 1000; border: 2px solid color-mix(in srgb,var(--tile),#fff 35%); border-radius: 12px;
+  background: linear-gradient(145deg,color-mix(in srgb,var(--tile),#fff 22%),color-mix(in srgb,var(--tile),var(--primary) 22%));
+  box-shadow: 0 5px 0 color-mix(in srgb,var(--secondary),#000 28%),0 9px 16px rgba(0,0,0,.3);
+}
+.brand-copy h2 { margin: 0; color: var(--text); font-family: var(--font-family); font-size: clamp(21px,calc(var(--word-font-size) * 1.05),32px); font-weight: 1000; letter-spacing: -.5px; line-height: .95; text-transform: none; }
+.brand-copy h2 em { color: var(--secondary); font-family: Georgia,"Times New Roman",serif; font-weight: 600; }
+.brand-copy small { display: block; margin-top: 7px; color: color-mix(in srgb,var(--text),transparent 38%); font-size: 9px; font-weight: 700; letter-spacing: 1px; }
+.brand-board > strong { padding: 9px 13px; color: var(--panel); font-size: clamp(12px,calc(var(--word-font-size) * .65),18px); border-radius: 9px; background: var(--primary); box-shadow: 0 4px 0 color-mix(in srgb,var(--secondary),#000 28%); }
 .board { min-width: 0; width: 100%; }
 .board h2 { margin: 0 0 7px; color: var(--primary); font-size: 15px; letter-spacing: 1px; text-align: center; text-transform: uppercase; }
 .board ol { display: grid; gap: 5px; margin: 0; padding: 0; list-style: none; }
