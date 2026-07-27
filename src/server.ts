@@ -116,6 +116,7 @@ app.get("/auth/twitch/callback", async (request, response) => {
     if (!pending || pending.expiresAt < Date.now()) throw new Error("Login expired. Start the Twitch connection again.");
     const credentials = await pending.auth.exchangeCode(String(request.query.code ?? ""), state);
     const runtime = await manager.adoptAuthentication(pending.filePath, credentials.userId, credentials.login);
+    console.log(`[${runtime.profile.login}] Twitch authorization completed.`);
     setSessionCookie(request, response, runtime.profile.userId);
     response.redirect("/control?connected=1");
   } catch (error) {

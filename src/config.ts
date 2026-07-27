@@ -11,7 +11,7 @@ export const config = {
   port: integer("PORT", 1010),
   sessionSecret: process.env.SESSION_SECRET ?? "",
   game: {
-    mode: "race",
+    mode: "level",
     languages: ["english"],
     roundSeconds: Math.max(10, integer("ROUND_SECONDS", 90)),
     countdownSeconds: 5,

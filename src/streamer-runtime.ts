@@ -2,7 +2,7 @@ import crypto from "node:crypto";
 import fs from "node:fs";
 import path from "node:path";
 import type WebSocket from "ws";
-import type { GameSettings, LanguageInfo } from "./types.js";
+import type { GameSettings, LanguageInfo, PublicGameState } from "./types.js";
 import { Game } from "./game.js";
 import { LanguageCatalog } from "./language-catalog.js";
 import { ScoreStore } from "./score-store.js";
@@ -25,6 +25,8 @@ export class StreamerRuntime {
   readonly twitch: TwitchChat;
   readonly clients = new Set<WebSocket>();
   private languages: LanguageCatalog;
+  private previousPhase: PublicGameState["phase"] = "setup";
+  private previousRound = 0;
 
   constructor(
     readonly profile: StreamerProfile,
@@ -47,6 +49,7 @@ export class StreamerRuntime {
     );
     this.twitch = new TwitchChat(this.game, profile.login);
     this.game.on("change", (state) => {
+      this.logLifecycle(state);
       const message = JSON.stringify(state);
       for (const client of this.clients) if (client.readyState === client.OPEN) client.send(message);
     });
@@ -152,6 +155,29 @@ export class StreamerRuntime {
     const selection = this.selectedLanguages();
     this.game.setDictionary(selection.dictionary, selection.languages);
     this.game.configure(this.settings.get(), true);
+  }
+
+  private logLifecycle(state: PublicGameState): void {
+    if (state.round !== this.previousRound && (state.phase === "countdown" || state.phase === "playing")) {
+      const languages = state.languages.map((language) => language.name).join(" / ");
+      const details = state.settings.mode === "level" && state.level
+        ? `Level ${state.level.number}, target ${state.level.target} points`
+        : state.settings.mode === "time" ? "Time Attack" : "Race";
+      console.log(`[${this.profile.login}] Round ${state.round} starting — ${details}; languages: ${languages}.`);
+    }
+    if (state.phase === "results" && this.previousPhase !== "results") {
+      const words = `${state.foundWords.length} unique word${state.foundWords.length === 1 ? "" : "s"}`;
+      if (state.settings.mode === "level" && state.level) {
+        const result = state.level.success
+          ? `victory, cleared ${state.level.levelsCleared} level${state.level.levelsCleared === 1 ? "" : "s"}`
+          : "defeat";
+        console.log(`[${this.profile.login}] Round ${state.round} ended — ${result}; ${words}.`);
+      } else {
+        console.log(`[${this.profile.login}] Round ${state.round} ended — ${words}.`);
+      }
+    }
+    this.previousPhase = state.phase;
+    this.previousRound = state.round;
   }
 }
 

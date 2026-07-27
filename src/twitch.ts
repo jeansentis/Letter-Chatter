@@ -5,6 +5,7 @@ import type { TwitchCredentials } from "./twitch-auth.js";
 export class TwitchChat {
   private socket?: WebSocket;
   private intentionalClose = false;
+  private loggedConnected = false;
   private seenMessages = new Set<string>();
 
   private options?: TwitchCredentials;
@@ -28,15 +29,22 @@ export class TwitchChat {
     });
     socket.on("close", () => {
       if (this.socket !== socket) return;
+      const wasConnected = this.loggedConnected;
+      this.loggedConnected = false;
       this.game.twitchConnected = false;
       this.game.enterSetup();
-      if (!this.intentionalClose && this.options) setTimeout(() => this.connect(this.options!), 5000);
+      if (!this.intentionalClose && this.options) {
+        if (wasConnected) console.log(`[${this.label}] Twitch disconnected; reconnecting in 5 seconds.`);
+        setTimeout(() => this.connect(this.options!), 5000);
+      }
     });
     socket.on("error", (error) => console.error(`[${this.label}] Twitch EventSub error:`, error.message));
   }
 
   close(): void {
     this.intentionalClose = true;
+    if (this.loggedConnected) console.log(`[${this.label}] Twitch connection closed.`);
+    this.loggedConnected = false;
     this.socket?.close();
     this.game.twitchConnected = false;
     this.game.enterSetup();
@@ -47,7 +55,10 @@ export class TwitchChat {
     if (type === "session_welcome") {
       if (!reusingSession) await this.subscribe(message.payload.session.id);
       this.game.twitchConnected = true;
+      if (!this.loggedConnected) console.log(`[${this.label}] Twitch connected.`);
+      this.loggedConnected = true;
       this.game.emit("change", this.game.state());
+      if (!reusingSession) this.game.start();
       return;
     }
     if (type === "session_reconnect") {
@@ -88,6 +99,5 @@ export class TwitchChat {
       this.game.twitchConnected = false;
       throw new Error(`Twitch subscription failed (${response.status}): ${await response.text()}`);
     }
-    this.game.start();
   }
 }
