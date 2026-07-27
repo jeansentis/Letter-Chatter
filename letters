@@ -1,4 +1,57 @@
 #!/usr/bin/env node
 
+import "dotenv/config";
+import { spawn } from "node:child_process";
+
 process.env.NODE_ENV ||= "production";
-await import("./dist/src/server.js");
+const tunnelToken = process.env.CLOUDFLARE_TUNNEL_TOKEN?.trim();
+if (!tunnelToken) {
+  console.error("CLOUDFLARE_TUNNEL_TOKEN is missing from .env.");
+  process.exit(1);
+}
+
+const { CLOUDFLARE_TUNNEL_TOKEN: _secret, ...serverEnvironment } = process.env;
+const children = new Set();
+let shuttingDown = false;
+
+start("server", process.execPath, ["dist/src/server.js"], serverEnvironment);
+start("tunnel", "cloudflared", ["tunnel", "run"], {
+  ...serverEnvironment,
+  TUNNEL_TOKEN: tunnelToken,
+});
+
+process.on("SIGINT", () => shutdown("SIGINT"));
+process.on("SIGTERM", () => shutdown("SIGTERM"));
+
+function start(label, command, args, environment) {
+  const child = spawn(command, args, {
+    cwd: process.cwd(),
+    env: environment,
+    stdio: "inherit",
+  });
+  children.add(child);
+  child.once("error", (error) => {
+    console.error(`[${label}] Could not start: ${error.message}`);
+    shutdown("SIGTERM", 1);
+  });
+  child.once("exit", (code, signal) => {
+    children.delete(child);
+    if (shuttingDown) {
+      if (children.size === 0) process.exitCode ??= 0;
+      return;
+    }
+    console.error(`[${label}] Exited unexpectedly (${signal ?? `code ${code ?? 1}`}).`);
+    shutdown("SIGTERM", code || 1);
+  });
+}
+
+function shutdown(signal, exitCode = 0) {
+  if (shuttingDown) return;
+  shuttingDown = true;
+  process.exitCode = exitCode;
+  for (const child of children) child.kill(signal);
+  const forcedExit = setTimeout(() => {
+    for (const child of children) child.kill("SIGKILL");
+  }, 9000);
+  forcedExit.unref();
+}

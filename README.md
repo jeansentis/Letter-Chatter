@@ -15,7 +15,7 @@ Double-click **Stop Letter Chatters.cmd** to stop a server launched by the start
 
 ## Raspberry Pi and PM2
 
-The server and all active streamer games run inside one PM2 process named `letters`. This matches the other Pi services:
+The server, all active streamer games, and the dedicated Cloudflare connector run under one PM2 parent process named `letters`. This matches the other Pi services:
 
 ```sh
 cd /path/to/Letter-Chatter
@@ -38,7 +38,7 @@ pm2 logs
 pm2 status
 ```
 
-`pm2 logs` follows `mot`, `tcs`, and `letters` together. After pulling an update, run `npm ci`, `npm test`, `npm run build`, and `pm2 restart letters`. Run `pm2 save` whenever the saved PM2 process list changes. The service deliberately uses one process: live game state and OBS WebSockets are held in memory, while that process hosts any number of isolated streamer runtimes.
+`pm2 restart letters` restarts both the game server and its dedicated tunnel without touching the other projects. `pm2 logs` follows `mot`, `tcs`, and `letters` together. After pulling an update, run `npm ci`, `npm test`, `npm run build`, and `pm2 restart letters`. Run `pm2 save` whenever the saved PM2 process list changes. The game server deliberately uses one Node process: live game state and OBS WebSockets are held in memory, while that process hosts any number of isolated streamer runtimes.
 
 ## letterchatter.com
 
@@ -47,8 +47,9 @@ Create the production `.env` on the Pi:
 ```dotenv
 NODE_ENV=production
 HOST=127.0.0.1
-PORT=1010
+PORT=10100
 SESSION_SECRET=generate-a-long-random-value
+CLOUDFLARE_TUNNEL_TOKEN=token-from-the-dedicated-letters-tunnel
 TWITCH_CLIENT_ID=your-twitch-client-id
 TWITCH_CLIENT_SECRET=your-twitch-client-secret
 TWITCH_REDIRECT_URI=https://letterchatter.com/auth/twitch/callback
@@ -61,14 +62,15 @@ In the Twitch developer console, register `https://letterchatter.com/auth/twitch
 In Cloudflare:
 
 1. Make sure `letterchatter.com` is an active Cloudflare zone.
-2. Go to **Networking → Tunnels**, create a Cloudflare Tunnel, and install the displayed `cloudflared` connector command on the Pi.
-3. Add a published application route for hostname `letterchatter.com` with service `http://127.0.0.1:1010`. Cloudflare creates the tunnel DNS record.
-4. Optionally add `www.letterchatter.com` as another route to the same service, then create a redirect rule from `www` to the apex domain.
-5. Do not put a Cloudflare Access login policy in front of this hostname; the Twitch callback and OBS browser sources must reach it directly.
+2. Go to **Networking → Tunnels** and create a dedicated remotely-managed tunnel named `letters`. Do not install it as a system service.
+3. Copy only the `eyJ...` token from the displayed connector command into `CLOUDFLARE_TUNNEL_TOKEN` in `.env`.
+4. Add a published application route for hostname `letterchatter.com` with service `http://127.0.0.1:10100`. Cloudflare creates the tunnel DNS record.
+5. Optionally add `www.letterchatter.com` as another route to the same service, then create a redirect rule from `www` to the apex domain.
+6. Do not put a Cloudflare Access login policy in front of this hostname; the Twitch callback and OBS browser sources must reach it directly.
 
-Test locally on the Pi with `curl http://127.0.0.1:1010/health`, then test `https://letterchatter.com/health` externally. The public response should contain `"ok":true`. Open the home page, connect a Twitch broadcaster, copy their private overlay URL into OBS, and verify that a chat message reaches the overlay.
+Test locally on the Pi with `curl http://127.0.0.1:10100/health`, then test `https://letterchatter.com/health` externally. The public response should contain `"ok":true`. Open the home page, connect a Twitch broadcaster, copy their private overlay URL into OBS, and verify that a chat message reaches the overlay.
 
-Cloudflare terminates public HTTPS and forwards HTTP through the outbound tunnel to the loopback-only Node service, so port `1010` does not need to be opened on the router.
+Cloudflare terminates public HTTPS and forwards HTTP through the outbound tunnel to the loopback-only Node service, so port `10100` does not need to be opened on the router.
 
 Keep `.env` and all of `data/streamers` private because they contain Twitch refresh tokens and streamer data. Back up `data/streamers` regularly.
 
