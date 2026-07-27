@@ -2,6 +2,7 @@ const detail = document.querySelector("#twitch-detail");
 const action = document.querySelector("#twitch-action");
 const dot = document.querySelector("#live-dot");
 let overlayPath = null;
+let lettersOverlayPath = null;
 const numericSettings = [
   "roundSeconds", "countdownSeconds", "shuffleSeconds", "guessCooldownSeconds", "timeBonusSeconds", "minLetters", "maxLetters", "minimumWords", "levelBaseGoal", "levelGrowth", "dynamicPointsPerPlayer",
   "intermissionSeconds", "overlayWidth", "overlayHeight", "timerFontSize",
@@ -19,6 +20,7 @@ const palettes = {
 async function status() {
   const data = await fetch("/api/twitch/status").then((response) => response.json());
   overlayPath = data.overlayPath;
+  lettersOverlayPath = data.lettersOverlayPath;
   if (overlayPath) document.querySelector(".preview iframe").src = overlayPath;
   dot.textContent = data.connected ? "chat connected" : "chat offline";
   dot.className = data.connected ? "connected" : "";
@@ -123,14 +125,21 @@ document.querySelector("#copy-url").onclick = async (event) => {
   event.target.textContent = "Copied";
   setTimeout(() => event.target.textContent = "Copy URL", 1200);
 };
+document.querySelector("#copy-letters-url").onclick = async (event) => {
+  if (!lettersOverlayPath) return;
+  await navigator.clipboard.writeText(`${location.origin}${lettersOverlayPath}`);
+  event.target.textContent = "Copied";
+  setTimeout(() => event.target.textContent = "Copy letters URL", 1200);
+};
 document.querySelector("#regenerate-url").onclick = async () => {
-  if (!confirm("Rotate the private link? The current OBS browser source will stop receiving updates.")) return;
+  if (!confirm("Rotate the private link? Both current OBS browser sources will stop receiving updates.")) return;
   const response = await request("/api/overlay/regenerate", "POST");
   const result = await response.json();
   if (!response.ok) return;
   overlayPath = result.overlayPath;
+  lettersOverlayPath = result.lettersOverlayPath;
   document.querySelector(".preview iframe").src = overlayPath;
-  document.querySelector("#settings-result").textContent = "Private link rotated. Copy the new URL into OBS.";
+  document.querySelector("#settings-result").textContent = "Private links rotated. Copy both new URLs into OBS.";
 };
 document.querySelector("#logout").onclick = async () => {
   await request("/api/logout", "POST");

@@ -33,6 +33,10 @@ app.get("/overlay/:key", (request, response) => {
   if (!manager.forOverlay(request.params.key)) { response.status(404).send("Overlay not found."); return; }
   response.sendFile(path.join(publicDirectory, "overlay.html"));
 });
+app.get("/letters/:key", (request, response) => {
+  if (!manager.forOverlay(request.params.key)) { response.status(404).send("Overlay not found."); return; }
+  response.sendFile(path.join(publicDirectory, "letters-overlay.html"));
+});
 app.use(express.static(publicDirectory));
 
 app.get("/health", (_request, response) => response.json({ ok: true, streamers: manager.size }));
@@ -43,6 +47,7 @@ app.get("/api/session", (request, response) => {
     login: runtime.profile.login,
     connected: runtime.game.twitchConnected,
     overlayPath: `/overlay/${runtime.profile.overlayKey}`,
+    lettersOverlayPath: `/letters/${runtime.profile.overlayKey}`,
   } : { authenticated: false, connected: false });
 });
 app.get("/api/state", requireRuntime, (request, response) => response.json(runtimeFor(request)!.game.state()));
@@ -79,7 +84,7 @@ app.delete("/api/languages/:id", requireRuntime, (request, response) => {
 app.post("/api/overlay/regenerate", requireRuntime, (request, response) => {
   const runtime = runtimeFor(request)!;
   const overlayKey = manager.regenerateOverlayKey(runtime.profile.userId);
-  response.json({ overlayPath: `/overlay/${overlayKey}` });
+  response.json({ overlayPath: `/overlay/${overlayKey}`, lettersOverlayPath: `/letters/${overlayKey}` });
 });
 
 app.get("/api/twitch/status", (request, response) => {
@@ -92,6 +97,7 @@ app.get("/api/twitch/status", (request, response) => {
     login: runtime?.profile.login ?? null,
     redirectUri: config.twitch.redirectUri,
     overlayPath: runtime ? `/overlay/${runtime.profile.overlayKey}` : null,
+    lettersOverlayPath: runtime ? `/letters/${runtime.profile.overlayKey}` : null,
   });
 });
 app.get("/auth/twitch", (_request, response) => {

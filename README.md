@@ -9,7 +9,7 @@ A compact Twitch chat word game for an OBS browser source. Viewers make English 
 3. Register a Twitch application and set its OAuth redirect URL to exactly `http://localhost:1010/auth/twitch/callback` for local development.
 4. Put the application's Client ID and Client Secret in `.env`.
 5. Double-click **Start Letter Chatters.cmd** (or run `npm run dev`), then choose **Connect Twitch** in the dashboard that opens.
-6. Copy the private overlay URL from the dashboard into an OBS browser source. Match its width and height to the values shown in the dashboard.
+6. Copy the private overlay URL from the dashboard into an OBS browser source. Match its width and height to the values shown in the dashboard. The dashboard also provides a transparent letters-only source that can be added, scaled, and positioned separately while remaining synchronized with the main overlay.
 
 Double-click **Stop Letter Chatters.cmd** to stop a server launched by the start shortcut.
 

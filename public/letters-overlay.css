@@ -1,0 +1,45 @@
+:root {
+  color-scheme: dark;
+  --overlay-width: 600px;
+  --overlay-height: 150px;
+  --font-family: system-ui, sans-serif;
+  --letter-font-size: 27px;
+  --primary: #ffcf4a;
+  --secondary: #ff5fa2;
+  --panel: #35245f;
+  --tile: #fff3bd;
+  font-family: var(--font-family);
+}
+
+* { box-sizing: border-box; }
+html, body { width: var(--overlay-width); height: var(--overlay-height); margin: 0; overflow: hidden; background: transparent; }
+#letters-overlay { display: grid; width: 100%; height: 100%; place-items: center; overflow: hidden; }
+.letters { display: flex; align-items: center; justify-content: center; gap: max(5px,calc(var(--letter-font-size) * .18)); }
+.letter {
+  position: relative;
+  display: grid;
+  width: calc(var(--letter-font-size) * 1.67);
+  height: calc(var(--letter-font-size) * 1.86);
+  place-items: center;
+  color: color-mix(in srgb,var(--panel),#000 25%);
+  font-size: var(--letter-font-size);
+  font-style: normal;
+  font-weight: 800;
+  border: max(2px,calc(var(--letter-font-size) * .07)) solid rgba(255,255,255,.55);
+  border-radius: calc(var(--letter-font-size) * .4);
+  background: linear-gradient(145deg,color-mix(in srgb,var(--tile),#fff 25%),color-mix(in srgb,var(--tile),var(--primary) 16%));
+  box-shadow: 0 calc(var(--letter-font-size) * .15) 0 color-mix(in srgb,var(--secondary),#000 25%),0 calc(var(--letter-font-size) * .26) calc(var(--letter-font-size) * .45) rgba(0,0,0,.3);
+  will-change: transform,opacity;
+}
+.letter:nth-child(odd) { transform: rotate(-1deg); }
+.letter:nth-child(even) { transform: rotate(1deg); }
+.letter small { position: absolute; right: 10%; bottom: 4%; font-size: 26%; opacity: .6; }
+.letter.used { z-index: 2; animation: letter-highlight .78s cubic-bezier(.2,.9,.25,1); }
+.letter.perfect-used { animation: perfect-letter .8s cubic-bezier(.15,.9,.25,1); }
+
+@keyframes letter-highlight {
+  45% { color: #fff; background: var(--secondary); box-shadow: 0 0 0 4px var(--primary),0 9px 22px rgba(0,0,0,.45); transform: translateY(-8%) rotate(0) scale(1.16); }
+}
+@keyframes perfect-letter {
+  40% { color: var(--panel); background: #fff; box-shadow: 0 0 0 5px var(--primary),0 0 24px #fff,0 10px 22px rgba(0,0,0,.5); transform: translateY(-12%) rotate(0) scale(1.22); }
+}
