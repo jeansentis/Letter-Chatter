@@ -1,4 +1,4 @@
-# Letter Chatters
+# Letter Chatter
 
 A compact Twitch chat word game for an OBS browser source. Viewers make English words from the visible letter rack; the first valid guess scores and later duplicate guesses appear in gray for zero points.
 

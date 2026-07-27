@@ -259,13 +259,13 @@ function renderResults() {
 }
 
 function renderResultBoard() {
-  const boards = [["round", "This round"], ["stream", "This stream"], ["overall", "All time"], ["brand", "Letter Chatters"]];
+  const boards = [["round", "This round"], ["stream", "This stream"], ["overall", "All time"], ["brand", "Letter Chatter"]];
   const index = Math.floor((Date.now() - state.phaseStartedAt) / 3000) % boards.length;
   if (index === lastResultBoard) return;
   lastResultBoard = index;
   const [key, label] = boards[index];
   if (key === "brand") {
-    document.querySelector("#boards").innerHTML = `<div class="board brand-board"><div class="brand-lockup"><span class="brand-tile">LC</span><div class="brand-copy"><h2>Letter <em>Chatters</em></h2><small>By TheJeansentis</small></div></div><strong>letterchatter.com</strong></div>`;
+    document.querySelector("#boards").innerHTML = `<div class="board brand-board"><div class="brand-lockup"><span class="brand-tile">LC</span><div class="brand-copy"><h2>Letter <em>Chatter</em></h2><small>By TheJeansentis</small></div></div><strong>letterchatter.com</strong></div>`;
     return;
   }
   const rows = state.leaderboards[key];

@@ -163,7 +163,7 @@ app.post("/api/dev/start", requireRuntime, (request, response) => {
 });
 
 const server = app.listen(config.port, config.host, () => {
-  console.log(`Letter Chatters: http://${config.host}:${config.port}`);
+  console.log(`Letter Chatter: http://${config.host}:${config.port}`);
   console.log(`Loaded ${manager.size} streamer account${manager.size === 1 ? "" : "s"}.`);
   console.log(config.twitch.clientId && config.twitch.clientSecret && config.twitch.redirectUri
     ? "Twitch app credentials found."

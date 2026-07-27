@@ -36,7 +36,7 @@ try {
   $health = Invoke-RestMethod -Uri $healthUrl -TimeoutSec 2
   if ($health.ok) {
     Open-Dashboard
-    Write-Host "Letter Chatters is already running. Dashboard opened."
+    Write-Host "Letter Chatter is already running. Dashboard opened."
     exit 0
   }
 } catch {
@@ -56,14 +56,14 @@ $npm = (Get-Command npm.cmd -ErrorAction Stop).Source
 Set-Location $root
 
 if (-not (Test-Path (Join-Path $root "node_modules"))) {
-  Write-Host "Installing Letter Chatters dependencies..."
+  Write-Host "Installing Letter Chatter dependencies..."
   & $npm install
   if ($LASTEXITCODE -ne 0) { throw "npm install failed." }
 }
 
-Write-Host "Building Letter Chatters..."
+Write-Host "Building Letter Chatter..."
 & $npm run build
-if ($LASTEXITCODE -ne 0) { throw "The Letter Chatters build failed." }
+if ($LASTEXITCODE -ne 0) { throw "The Letter Chatter build failed." }
 
 $serverFile = Join-Path $root "dist\src\server.js"
 $process = Start-Process -FilePath $node -ArgumentList @($serverFile) -WorkingDirectory $root -WindowStyle Hidden -RedirectStandardOutput $outputLog -RedirectStandardError $errorLog -PassThru
@@ -81,7 +81,7 @@ for ($attempt = 0; $attempt -lt 120; $attempt++) {
     $health = Invoke-RestMethod -Uri $healthUrl -TimeoutSec 2
     if ($health.ok) {
       Open-Dashboard
-      Write-Host "Letter Chatters is running. Dashboard opened."
+      Write-Host "Letter Chatter is running. Dashboard opened."
       exit 0
     }
   } catch {
