@@ -20,7 +20,7 @@ const palettes = {
 async function status() {
   const data = await fetch("/api/twitch/status").then((response) => response.json());
   overlayPath = data.overlayPath;
-  lettersOverlayPath = data.lettersOverlayPath;
+  lettersOverlayPath = resolveLettersOverlayPath(data.lettersOverlayPath, overlayPath);
   if (overlayPath) document.querySelector(".preview iframe").src = overlayPath;
   dot.textContent = data.connected ? "chat connected" : "chat offline";
   dot.className = data.connected ? "connected" : "";
@@ -120,16 +120,10 @@ document.querySelector("#theme").onchange = (event) => {
   if (palette) for (const [key, value] of Object.entries(palette)) document.querySelector(`#${key}`).value = value;
 };
 document.querySelector("#copy-url").onclick = async (event) => {
-  if (!overlayPath) return;
-  await navigator.clipboard.writeText(`${location.origin}${overlayPath}`);
-  event.target.textContent = "Copied";
-  setTimeout(() => event.target.textContent = "Copy URL", 1200);
+  await copyOverlayUrl(overlayPath, event.target, "Copy URL");
 };
 document.querySelector("#copy-letters-url").onclick = async (event) => {
-  if (!lettersOverlayPath) return;
-  await navigator.clipboard.writeText(`${location.origin}${lettersOverlayPath}`);
-  event.target.textContent = "Copied";
-  setTimeout(() => event.target.textContent = "Copy letters URL", 1200);
+  await copyOverlayUrl(lettersOverlayPath, event.target, "Copy letters URL");
 };
 document.querySelector("#regenerate-url").onclick = async () => {
   if (!confirm("Rotate the private link? Both current OBS browser sources will stop receiving updates.")) return;
@@ -137,7 +131,7 @@ document.querySelector("#regenerate-url").onclick = async () => {
   const result = await response.json();
   if (!response.ok) return;
   overlayPath = result.overlayPath;
-  lettersOverlayPath = result.lettersOverlayPath;
+  lettersOverlayPath = resolveLettersOverlayPath(result.lettersOverlayPath, overlayPath);
   document.querySelector(".preview iframe").src = overlayPath;
   document.querySelector("#settings-result").textContent = "Private links rotated. Copy both new URLs into OBS.";
 };
@@ -199,4 +193,44 @@ function escapeHtml(value) {
 
 function escapeAttribute(value) {
   return escapeHtml(value).replaceAll('"', "&quot;");
+}
+
+function resolveLettersOverlayPath(explicitPath, mainPath) {
+  if (explicitPath) return explicitPath;
+  return typeof mainPath === "string" && mainPath.startsWith("/overlay/")
+    ? `/letters/${mainPath.slice("/overlay/".length)}`
+    : null;
+}
+
+async function copyOverlayUrl(path, button, idleLabel) {
+  if (!path) {
+    button.textContent = "URL unavailable";
+    setTimeout(() => button.textContent = idleLabel, 1800);
+    return;
+  }
+  try {
+    await copyText(new URL(path, location.origin).href);
+    button.textContent = "Copied";
+  } catch {
+    button.textContent = "Copy failed";
+  }
+  setTimeout(() => button.textContent = idleLabel, 1800);
+}
+
+async function copyText(text) {
+  if (navigator.clipboard?.writeText && window.isSecureContext) {
+    try {
+      await navigator.clipboard.writeText(text);
+      return;
+    } catch { /* Fall back for browsers that block the Clipboard API. */ }
+  }
+  const field = document.createElement("textarea");
+  field.value = text;
+  field.setAttribute("readonly", "");
+  field.style.cssText = "position:fixed;left:-9999px;opacity:0";
+  document.body.append(field);
+  field.select();
+  const copied = document.execCommand("copy");
+  field.remove();
+  if (!copied) throw new Error("Clipboard copy was rejected.");
 }
