@@ -7,6 +7,7 @@ const integer = (name: string, fallback: number) => {
 };
 
 export const config = {
+  host: process.env.HOST ?? "127.0.0.1",
   port: integer("PORT", 1010),
   sessionSecret: process.env.SESSION_SECRET ?? "",
   game: {

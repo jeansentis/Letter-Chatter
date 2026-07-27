@@ -18,6 +18,13 @@ const manager = new StreamerManager(root, config.game, config.twitch);
 const pendingAuth = new Map<string, { auth: TwitchAuth; filePath: string; expiresAt: number }>();
 const app = express();
 app.set("trust proxy", 1);
+app.use((_request, response, next) => {
+  response.setHeader("X-Content-Type-Options", "nosniff");
+  response.setHeader("Referrer-Policy", "same-origin");
+  response.setHeader("Permissions-Policy", "camera=(), microphone=(), geolocation=()");
+  response.setHeader("Content-Security-Policy", "default-src 'self'; img-src 'self' data:; style-src 'self'; script-src 'self'; connect-src 'self' ws: wss:; frame-src 'self'; base-uri 'self'; form-action 'self' https://id.twitch.tv");
+  next();
+});
 app.use(express.json({ limit: "6mb" }));
 
 app.get("/control", requireLoginPage, (_request, response) => response.sendFile(path.join(publicDirectory, "control.html")));
@@ -148,8 +155,8 @@ app.post("/api/dev/start", requireRuntime, (request, response) => {
   response.json(runtime.game.state());
 });
 
-const server = app.listen(config.port, () => {
-  console.log(`Letter Chatters: http://localhost:${config.port}`);
+const server = app.listen(config.port, config.host, () => {
+  console.log(`Letter Chatters: http://${config.host}:${config.port}`);
   console.log(`Loaded ${manager.size} streamer account${manager.size === 1 ? "" : "s"}.`);
   console.log(config.twitch.clientId && config.twitch.clientSecret && config.twitch.redirectUri
     ? "Twitch app credentials found."

@@ -11,9 +11,9 @@
     "dev": "tsx watch src/server.ts",
     "build": "tsc",
     "start": "node dist/src/server.js",
-    "pm2:start": "pm2 start ecosystem.config.cjs",
-    "pm2:reload": "npm run build && pm2 reload ecosystem.config.cjs",
-    "pm2:logs": "pm2 logs letter-chatters",
+    "pm2:start": "pm2 start letters",
+    "pm2:restart": "npm run build && pm2 restart letters --update-env",
+    "pm2:logs": "pm2 logs letters",
     "test": "node --import tsx --test test/*.test.ts",
     "import-languages": "node scripts/import-language-packs.mjs"
   },

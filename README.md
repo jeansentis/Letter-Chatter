@@ -15,20 +15,62 @@ Double-click **Stop Letter Chatters.cmd** to stop a server launched by the start
 
 ## Raspberry Pi and PM2
 
-Use a current 64-bit Raspberry Pi OS with Node.js 20+:
+The server and all active streamer games run inside one PM2 process named `letters`. This matches the other Pi services:
 
 ```sh
+cd /path/to/Letter-Chatter
 npm ci
 npm run build
 sudo npm install -g pm2
-npm run pm2:start
+chmod +x letters
+pm2 start letters
 pm2 startup
 pm2 save
 ```
 
-Run `npm run pm2:logs` to follow Letter Chatters, `pm2 logs` to follow every PM2 service on the Pi together, `pm2 status` to inspect them, and `npm run pm2:reload` after pulling and testing an update. The PM2 configuration deliberately uses one process: live game state and OBS WebSockets are held in memory, while that process can host any number of isolated streamer runtimes.
+The normal commands are:
 
-Put the site behind HTTPS with a tunnel or reverse proxy. Set `TWITCH_REDIRECT_URI` to the exact public callback, such as `https://play.example.com/auth/twitch/callback`, register that same URL in the Twitch developer console, and set a long random `SESSION_SECRET`. Keep `.env` and all of `data/streamers` private because they contain Twitch refresh tokens and streamer data.
+```sh
+pm2 restart letters
+pm2 stop letters
+pm2 logs letters
+pm2 logs
+pm2 status
+```
+
+`pm2 logs` follows `mot`, `tcs`, and `letters` together. After pulling an update, run `npm ci`, `npm test`, `npm run build`, and `pm2 restart letters`. Run `pm2 save` whenever the saved PM2 process list changes. The service deliberately uses one process: live game state and OBS WebSockets are held in memory, while that process hosts any number of isolated streamer runtimes.
+
+## letterchatter.com
+
+Create the production `.env` on the Pi:
+
+```dotenv
+NODE_ENV=production
+HOST=127.0.0.1
+PORT=1010
+SESSION_SECRET=generate-a-long-random-value
+TWITCH_CLIENT_ID=your-twitch-client-id
+TWITCH_CLIENT_SECRET=your-twitch-client-secret
+TWITCH_REDIRECT_URI=https://letterchatter.com/auth/twitch/callback
+```
+
+Generate the session secret with `openssl rand -hex 32`. Never commit `.env`.
+
+In the Twitch developer console, register `https://letterchatter.com/auth/twitch/callback` as an OAuth redirect URL. It must match `TWITCH_REDIRECT_URI` exactly.
+
+In Cloudflare:
+
+1. Make sure `letterchatter.com` is an active Cloudflare zone.
+2. Go to **Networking → Tunnels**, create a Cloudflare Tunnel, and install the displayed `cloudflared` connector command on the Pi.
+3. Add a published application route for hostname `letterchatter.com` with service `http://127.0.0.1:1010`. Cloudflare creates the tunnel DNS record.
+4. Optionally add `www.letterchatter.com` as another route to the same service, then create a redirect rule from `www` to the apex domain.
+5. Do not put a Cloudflare Access login policy in front of this hostname; the Twitch callback and OBS browser sources must reach it directly.
+
+Test locally on the Pi with `curl http://127.0.0.1:1010/health`, then test `https://letterchatter.com/health` externally. The public response should contain `"ok":true`. Open the home page, connect a Twitch broadcaster, copy their private overlay URL into OBS, and verify that a chat message reaches the overlay.
+
+Cloudflare terminates public HTTPS and forwards HTTP through the outbound tunnel to the loopback-only Node service, so port `1010` does not need to be opened on the router.
+
+Keep `.env` and all of `data/streamers` private because they contain Twitch refresh tokens and streamer data. Back up `data/streamers` regularly.
 
 Each Twitch broadcaster gets an isolated directory under `data/streamers/<twitch-user-id>` with their settings, scores, authentication, custom languages, and persistent private overlay key. Existing single-streamer data is copied into this layout automatically on the first multi-streamer start.
 
