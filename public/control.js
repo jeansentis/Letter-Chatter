@@ -21,7 +21,7 @@ async function status() {
   const data = await fetch("/api/twitch/status").then((response) => response.json());
   overlayPath = data.overlayPath;
   lettersOverlayPath = resolveLettersOverlayPath(data.lettersOverlayPath, overlayPath);
-  if (overlayPath) document.querySelector(".preview iframe").src = overlayPath;
+  updatePreviewSource();
   dot.textContent = data.connected ? "chat connected" : "chat offline";
   dot.className = data.connected ? "connected" : "";
   if (!data.configured) {
@@ -82,7 +82,7 @@ function renderSettings(settings) {
   document.querySelector("#intermissionSeconds").disabled = !settings.autoContinue;
   updateConditionalSettings(settings.mode, settings.dynamicDifficulty);
   const frame = document.querySelector(".preview iframe");
-  if (overlayPath) frame.src = overlayPath;
+  updatePreviewSource();
   frame.width = settings.overlayWidth;
   frame.height = settings.overlayHeight;
   document.querySelector("#preview-size").textContent = `OBS PREVIEW - ${settings.overlayWidth} x ${settings.overlayHeight}`;
@@ -132,7 +132,7 @@ document.querySelector("#regenerate-url").onclick = async () => {
   if (!response.ok) return;
   overlayPath = result.overlayPath;
   lettersOverlayPath = resolveLettersOverlayPath(result.lettersOverlayPath, overlayPath);
-  document.querySelector(".preview iframe").src = overlayPath;
+  updatePreviewSource();
   document.querySelector("#settings-result").textContent = "Private links rotated. Copy both new URLs into OBS.";
 };
 document.querySelector("#logout").onclick = async () => {
@@ -200,6 +200,12 @@ function resolveLettersOverlayPath(explicitPath, mainPath) {
   return typeof mainPath === "string" && mainPath.startsWith("/overlay/")
     ? `/letters/${mainPath.slice("/overlay/".length)}`
     : null;
+}
+
+function updatePreviewSource() {
+  if (!overlayPath) return;
+  const frame = document.querySelector(".preview iframe");
+  if (frame.getAttribute("src") !== overlayPath) frame.setAttribute("src", overlayPath);
 }
 
 async function copyOverlayUrl(path, button, idleLabel) {
