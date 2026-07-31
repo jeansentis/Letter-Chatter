@@ -174,12 +174,10 @@ webSockets.on("connection", (client, request) => {
   const url = new URL(request.url ?? "/", `http://${request.headers.host ?? "localhost"}`);
   const runtime = url.pathname === "/live" ? manager.forOverlay(url.searchParams.get("overlay") ?? "") : undefined;
   if (!runtime) { client.close(1008, "Unknown overlay"); return; }
-  runtime.clients.add(client);
+  runtime.attachOverlay(client);
   client.send(JSON.stringify(runtime.game.state()));
-  client.on("close", () => runtime.clients.delete(client));
+  client.on("close", () => runtime.detachOverlay(client));
 });
-
-void manager.resumeAll();
 
 const shutdown = () => {
   manager.stopAll();

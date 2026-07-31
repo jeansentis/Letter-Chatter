@@ -3,6 +3,7 @@ import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
 import test from "node:test";
+import type WebSocket from "ws";
 import { config } from "../src/config.js";
 import { StreamerManager, type StreamerProfile } from "../src/streamer-runtime.js";
 
@@ -42,6 +43,38 @@ test("isolates settings, overlays, scores, and uploaded languages by streamer", 
     assert.equal(bravo.settings.get().wordFontSize, 27);
     assert.equal(alpha.languageList().some((language) => language.id === "custom-testish"), true);
     assert.equal(bravo.languageList().some((language) => language.id === "custom-testish"), false);
+    manager.stopAll();
+  } finally {
+    fs.rmSync(root, { recursive: true, force: true });
+  }
+});
+
+test("connects Twitch only while an overlay is active", async () => {
+  const root = fs.mkdtempSync(path.join(os.tmpdir(), "letter-chatters-overlay-lifecycle-"));
+  try {
+    const profile: StreamerProfile = { userId: "300", login: "charlie", overlayKey: "charlie-private-key" };
+    const directory = path.join(root, "data", "streamers", profile.userId);
+    fs.mkdirSync(path.join(root, "data", "languages"), { recursive: true });
+    fs.mkdirSync(directory, { recursive: true });
+    fs.writeFileSync(path.join(directory, "profile.json"), JSON.stringify(profile));
+
+    const manager = new StreamerManager(root, config.game, { clientId: "client", clientSecret: "secret", redirectUri: "callback" });
+    const runtime = manager.get("300")!;
+    let connections = 0;
+    runtime.auth.resume = async () => ({
+      clientId: "client", token: "token", broadcasterUserId: "300", userId: "300", login: "charlie",
+    });
+    runtime.twitch.connect = () => { connections += 1; };
+    const client = { OPEN: 1, readyState: 1, send() {}, close() {} } as unknown as WebSocket;
+
+    await runtime.resume();
+    assert.equal(connections, 0);
+    runtime.attachOverlay(client);
+    await new Promise<void>((resolve) => setImmediate(resolve));
+    assert.equal(connections, 1);
+    runtime.attachOverlay(client);
+    await new Promise<void>((resolve) => setImmediate(resolve));
+    assert.equal(connections, 1);
     manager.stopAll();
   } finally {
     fs.rmSync(root, { recursive: true, force: true });

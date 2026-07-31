@@ -10,6 +10,8 @@ import { SettingsStore } from "./settings-store.js";
 import { TwitchAuth } from "./twitch-auth.js";
 import { TwitchChat } from "./twitch.js";
 
+const OVERLAY_IDLE_GRACE_MS = 30_000;
+
 export interface StreamerProfile {
   userId: string;
   login: string;
@@ -27,6 +29,9 @@ export class StreamerRuntime {
   private languages: LanguageCatalog;
   private previousPhase: PublicGameState["phase"] = "setup";
   private previousRound = 0;
+  private overlayIdleTimer?: NodeJS.Timeout;
+  private activation?: Promise<void>;
+  private stopped = false;
 
   constructor(
     readonly profile: StreamerProfile,
@@ -56,8 +61,43 @@ export class StreamerRuntime {
   }
 
   async resume(): Promise<void> {
-    const credentials = await this.auth.resume();
-    if (credentials) this.twitch.connect(credentials);
+    if (this.clients.size === 0 || this.stopped) return;
+    if (this.activation) return this.activation;
+    this.activation = (async () => {
+      const credentials = await this.auth.resume();
+      if (credentials && this.clients.size > 0 && !this.stopped) this.twitch.connect(credentials);
+    })();
+    try {
+      await this.activation;
+    } finally {
+      this.activation = undefined;
+    }
+  }
+
+  attachOverlay(client: WebSocket): void {
+    const wasInactive = this.clients.size === 0;
+    const wasInGracePeriod = Boolean(this.overlayIdleTimer);
+    this.clients.add(client);
+    if (this.overlayIdleTimer) {
+      clearTimeout(this.overlayIdleTimer);
+      this.overlayIdleTimer = undefined;
+    }
+    if (!wasInactive || wasInGracePeriod) return;
+    void this.resume().catch((error) => {
+      console.error(`[${this.profile.login}] Could not connect Twitch for active overlay:`, (error as Error).message);
+    });
+  }
+
+  detachOverlay(client: WebSocket): void {
+    this.clients.delete(client);
+    if (this.clients.size > 0 || this.stopped || this.overlayIdleTimer) return;
+    this.overlayIdleTimer = setTimeout(() => {
+      this.overlayIdleTimer = undefined;
+      if (this.clients.size === 0) {
+        console.log(`[${this.profile.login}] No active overlays; pausing Twitch connection.`);
+        this.twitch.close();
+      }
+    }, OVERLAY_IDLE_GRACE_MS);
   }
 
   languageList(): Array<LanguageInfo & { custom: boolean }> {
@@ -132,6 +172,11 @@ export class StreamerRuntime {
   }
 
   stop(): void {
+    this.stopped = true;
+    if (this.overlayIdleTimer) {
+      clearTimeout(this.overlayIdleTimer);
+      this.overlayIdleTimer = undefined;
+    }
     this.twitch.close();
     this.game.stop();
     for (const client of this.clients) client.close();
@@ -243,13 +288,6 @@ export class StreamerManager {
     this.overlayRuntimes.set(profile.overlayKey, runtime);
     await runtime.resume();
     return runtime;
-  }
-
-  async resumeAll(): Promise<void> {
-    await Promise.allSettled([...this.runtimes.values()].map(async (runtime) => {
-      try { await runtime.resume(); }
-      catch (error) { console.error(`[${runtime.profile.login}] Could not resume Twitch login:`, (error as Error).message); }
-    }));
   }
 
   stopAll(): void {
